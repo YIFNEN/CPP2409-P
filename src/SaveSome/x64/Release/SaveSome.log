@@ -1,0 +1,2 @@
+﻿  main.cpp
+C:\Users\sun99\Desktop\자료\전공공부\학교공부\C++\Project\SaveSome\main.cpp(1,10): fatal  error C1083: 포함 파일을 열 수 없습니다. 'SFML/Graphics.hpp': No such file or directory
