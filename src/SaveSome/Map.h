@@ -1,9 +1,23 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <SFML/Graphics.hpp>
 #include <vector>
 
-std::vector<std::vector<int>> createMap(int width, int height);
+class Map {
+public:
+    void initialize(int width, int height);
+    void update(const sf::FloatRect& playerBounds);
+    void render(sf::RenderWindow& window);
+
+    bool isCollidable(int x, int y) const;
+
+private:
+    std::vector<std::vector<int>> mapData;
+    sf::RectangleShape tileShape;
+    int tileSize = 40;
+
+    void loadMap(); // 간단한 맵 생성
+};
 
 #endif // MAP_H
-

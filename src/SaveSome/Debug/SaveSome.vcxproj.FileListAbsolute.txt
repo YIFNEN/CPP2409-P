@@ -1,2 +1,3 @@
 C:\Users\sun99\Desktop\자료\전공공부\학교공부\C++\Project\SaveSome\Debug\SaveSome.exe
 C:\CPP2409-P\SaveSome\Debug\SaveSome.exe
+C:\CPP2409-P\src\SaveSome\Debug\SaveSome.exe

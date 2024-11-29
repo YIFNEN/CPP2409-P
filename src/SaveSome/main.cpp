@@ -2,14 +2,12 @@
 using namespace sf;
 
 int main() {
-
     GameManager& gameManager = GameManager::getInstance();
     gameManager.initialize();
 
-    Clock clock; // 시간 측정을 위한 시계
-
+    Clock clock;
     while (gameManager.getWindow().isOpen()) {
-        float deltaTime = clock.restart().asSeconds(); // 프레임 간 시간 계산
+        float deltaTime = clock.restart().asSeconds();
         gameManager.processEvents();
         gameManager.update(deltaTime);
         gameManager.render();
