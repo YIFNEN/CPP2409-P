@@ -1,8 +1,9 @@
 #include "Map.h"
-
+#include <cstdlib>
 using namespace sf;
 
 void Map::initialize(int width, int height) {
+
     mapData = std::vector<std::vector<int>>(height, std::vector<int>(width, 0));
     tileShape.setSize(Vector2f(tileSize, tileSize));
     tileShape.setOutlineColor(Color::Black);
@@ -54,7 +55,7 @@ void Map::render(RenderWindow& window) {
                 tileShape.setPosition(x * tileSize, y * tileSize);
 
                 if (mapData[y][x] == 1)
-                    tileShape.setFillColor(Color::Blue); // 벽
+                    tileShape.setFillColor(Color::Magenta); // 벽
                 else if (mapData[y][x] == 2)
                     tileShape.setFillColor(Color::Green); // 특수 타일
 
