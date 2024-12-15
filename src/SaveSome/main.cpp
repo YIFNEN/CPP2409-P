@@ -1,17 +1,7 @@
-#include "GameManager.h"
-using namespace sf;
+#include "Game.h"
 
 int main() {
-    GameManager& gameManager = GameManager::getInstance();
-    gameManager.initialize();
-
-    Clock clock;
-    while (gameManager.getWindow().isOpen()) {
-        float deltaTime = clock.restart().asSeconds();
-        gameManager.processEvents();
-        gameManager.update(deltaTime);
-        gameManager.render();
-    }
-
+    Game game;
+    game.run();
     return 0;
 }

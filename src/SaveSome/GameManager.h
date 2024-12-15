@@ -10,7 +10,7 @@
 
 class GameManager {
 public:
-    static GameManager& getInstance();
+    static GameManager& getInstance();  // 싱글턴 접근 함수
     void initialize(); // 게임 초기화
     void processEvents(); // 이벤트 처리
     void update(float deltaTime); // 상태 업데이트
@@ -22,7 +22,12 @@ public:
     void spawnObstacle(); // 장애물 생성
 
 private:
-    GameManager() = default;
+    GameManager() {} //  기본 생성자 (private으로 유지)
+    ~GameManager() = default; // 소멸자 기본 설정
+
+    GameManager(const GameManager&) = delete; // 복사 생성자 삭제
+    GameManager& operator=(const GameManager&) = delete; // 복사 대입 연산자 삭제
+
     sf::RenderWindow window;
     Player player;
     Map map;
@@ -30,4 +35,4 @@ private:
     std::vector<Obstacle> obstacles;
 };
 
-#endif // GAMEMANAGER_H
+#endif 

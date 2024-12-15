@@ -1,72 +1,63 @@
 #include "Map.h"
 #include <cstdlib>
-using namespace sf;
+#include <ctime>
 
+Map::Map() {
+    // 기본 생성자에서는 기본값을 설정하거나 빈 맵을 초기화할 수 있습니다.
+    tileSize = { 40.f, 40.f };  // 기본 타일 크기 설정
+    // tiles에 대해서도 초기화하거나 비워두는 등의 작업을 할 수 있습니다.
+}
 void Map::initialize(int width, int height) {
 
-    mapData = std::vector<std::vector<int>>(height, std::vector<int>(width, 0));
-    tileShape.setSize(Vector2f(tileSize, tileSize));
-    tileShape.setOutlineColor(Color::Black);
-    tileShape.setOutlineThickness(1);
 
-    loadMap(); // 맵 데이터 생성
 }
+Map::Map(int width, int height) {
+    tileSize = { 40, 40 };
+    tiles.resize(height, std::vector<sf::RectangleShape>(width));
 
-void Map::loadMap() {
-    int width = mapData[0].size();
-    int height = mapData.size();
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            // 벽으로 맵 테두리 생성
-            if (x == 0 || x == width - 1 || y == 0 || y == height - 1) {
-                mapData[y][x] = 1; // 1은 충돌 가능 블록
-            } else if (rand() % 10 == 0) {
-                mapData[y][x] = 2; // 2는 색상 타일 (랜덤)
+            sf::RectangleShape tile(tileSize);
+            tile.setPosition(x * tileSize.x, y * tileSize.y);
+
+            int randColor = std::rand() % 10;
+            if (randColor < 2) {
+                tile.setFillColor(sf::Color::Red);
             }
+            else if (randColor < 4) {
+                tile.setFillColor(sf::Color::Green);
+            }
+            else if (randColor < 6) {
+                tile.setFillColor(sf::Color::Blue);
+            }
+            else {
+                tile.setFillColor(sf::Color::Magenta);
+            }
+
+            tiles[y][x] = tile;
         }
     }
 }
 
-void Map::update(const FloatRect& playerBounds) {
-    int width = mapData[0].size();
-    int height = mapData.size();
-
-    // 충돌 처리 (예시)
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            if (mapData[y][x] == 1) {
-                FloatRect tileBounds(x * tileSize, y * tileSize, tileSize, tileSize);
-                if (playerBounds.intersects(tileBounds)) {
-                    // 충돌 발생 시 플레이어 위치를 보정
-                }
-            }
+void Map::render(sf::RenderWindow& window) {
+    for (const auto& row : tiles) {
+        for (const auto& tile : row) {
+            window.draw(tile);
         }
     }
 }
 
-void Map::render(RenderWindow& window) {
-    int width = mapData[0].size();
-    int height = mapData.size();
-
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            if (mapData[y][x] > 0) {
-                tileShape.setPosition(x * tileSize, y * tileSize);
-
-                if (mapData[y][x] == 1)
-                    tileShape.setFillColor(Color::Magenta); // 벽
-                else if (mapData[y][x] == 2)
-                    tileShape.setFillColor(Color::Green); // 특수 타일
-
-                window.draw(tileShape);
+void Map::update(const sf::FloatRect& playerBounds) {
+    for (auto& row : tiles) {
+        for (auto& tile : row) {
+            if (tile.getGlobalBounds().intersects(playerBounds)) {
+                // 타일과 플레이어 간 충돌 처리
             }
         }
     }
 }
-
-bool Map::isCollidable(int x, int y) const {
-    if (x >= 0 && y >= 0 && y < mapData.size() && x < mapData[0].size())
-        return mapData[y][x] == 1;
-    return false;
+sf::FloatRect Map::getBounds() const {
+    return sf::FloatRect(0, 0, tileSize.x * tiles[0].size(), tileSize.y * tiles.size());
 }

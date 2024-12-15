@@ -1,61 +1,106 @@
 #include "Player.h"
-using namespace sf;
 
 void Player::initialize() {
-    shape.setSize(Vector2f(20.f, 20.f));//플레이어 크기 설정
-    shape.setFillColor(Color::Red);
-    shape.setPosition(100.f, groundY); //플레이어 초기 위치 설정
-    color = Color::Red;
+    // 초기화 로직 추가
+    shape.setPosition(100.f, 100.f); // 초기 위치 설정
+    shape.setSize(sf::Vector2f(50.f, 50.f));  // 크기 설정
+    shape.setFillColor(sf::Color::White);      // 기본 색상 설정
+    health = 10;  // 기본 체력 설정
+    speed = 200.f; // 기본 속도 설정
+    velocityY = 0.f;  // Y 속도 초기화
+    gravity = 9.8f;  // 중력 값 설정
+    jumpStrength = -250.f; // 점프 힘 설정
+    isJumping = false; // 점프 상태 초기화
 }
 
-void Player::update(float deltaTime) {
-    Vector2f movement(0.f, 0.f);
+Player::Player(sf::Vector2f position, sf::Vector2f size)
+    : health(100), speed(200.f) {
+    shape.setSize(size);
+    shape.setPosition(position);
+    shape.setFillColor(sf::Color::Yellow);
+}
 
-    //플레이어의 좌 우 이동
-    if (Keyboard::isKeyPressed(Keyboard::Left)) movement.x -= speed * deltaTime;
-    if (Keyboard::isKeyPressed(Keyboard::Right)) movement.x += speed * deltaTime;
+void Player::update(float deltaTime, sf::FloatRect bounds) {
+    sf::Vector2f movement(0, 0);
+    // 키 입력 처리 (A, S, D로 이동)
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+        movement.y += 200 * deltaTime;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+        movement.x -= 200 * deltaTime;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+        movement.x += 200 * deltaTime;
+    }
 
-    //플레이어의 점프
-    if (Keyboard::isKeyPressed(Keyboard::Space) && !isJumping) {
-        jumpVelocity = -250.f;
+    // 점프 처리
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && !isJumping) {
+        velocityY = jumpStrength;
         isJumping = true;
     }
 
-    // 중력 설정
-    jumpVelocity += gravity * deltaTime; 
-    movement.y += jumpVelocity * deltaTime;
-
-    shape.move(movement);
-
-
-    //화면 경계 체크
-    Vector2f position = shape.getPosition();
-    if (position.x < 0) position.x = 0; //왼쪽 경계
-    if (position.x + shape.getSize().x > 800) position.x = 800 - shape.getSize().x; //화면 너비를 기준으로 경계 체크
-    if (position.y >= groundY) {
-        position.y = groundY;
-        isJumping = false;
-        jumpVelocity = 0.f;
+    // 중력 적용 (매 프레임마다 속도에 중력을 더함)
+    if (isJumping) {
+        velocityY += gravity * deltaTime; // 중력 적용
     }
-    shape.setPosition(position);
+ 
+    shape.move(movement);// 이동 처리
+
+    // Y 속도 적용 (중력에 의한 떨어짐)
+    shape.move(0, velocityY * deltaTime);
+    
+    // 바닥에 닿았을 때 처리 (Y 좌표가 일정 이상이면)
+    if (shape.getPosition().y >= bounds.height - shape.getSize().y) {
+        shape.setPosition(shape.getPosition().x, bounds.height - shape.getSize().y); // 바닥에 고정
+        velocityY = 0; // Y 속도를 0으로 설정 (떨어짐 멈춤)
+        isJumping = false; // 점프 중이 아님
+    }
+
+    // 화면 밖으로 나가지 않도록 제한
+    if (!bounds.contains(shape.getPosition())) {
+        shape.move(-movement);
+    }
 }
 
-void Player::render(RenderWindow& window) {
+void Player::render(sf::RenderWindow& window) {
     window.draw(shape);
 }
 
-void Player::changeColor(Color newColor) {
-    color = newColor;
-    shape.setFillColor(color);
-}
-
-void Player::losePixel() {
-    Vector2f size = shape.getSize();
-    if (size.x > 1.f && size.y > 1.f) {
-        shape.setSize(size - Vector2f(1.f, 1.f));
+void Player::takeDamage() {
+    --health;
+    if (health > 0) {
+        shape.setFillColor(sf::Color::Yellow);
+    }
+    else {
+        shape.setFillColor(sf::Color::Black);
     }
 }
 
-FloatRect Player::getBounds() const {
+bool Player::isDestroyed() const {
+    return health <= 0;
+}
+
+void Player::setColor(sf::Color color) {
+    shape.setFillColor(color);
+}
+
+
+sf::FloatRect Player::getBounds() const {
     return shape.getGlobalBounds();
+}
+
+void Player::changeColor(const sf::Color& newColor) {
+    shape.setFillColor(newColor);  // shape는 Player의 RectangleShape
+}
+
+void Player::increaseSpeed(float multiplier) {
+    speed *= multiplier; // 기존 속도에 곱셈 연산
+}
+
+// 점프 메서드: 점프를 시작하는 순간 Y 속도를 설정
+void Player::jump() {
+    if (!isJumping) {
+        velocityY = jumpStrength; // 점프 힘을 위쪽 방향으로 설정
+        isJumping = true;
+    }
 }

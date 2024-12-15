@@ -3,7 +3,7 @@
 using namespace sf;
 
 GameManager& GameManager::getInstance() {
-    static GameManager instance;
+    static GameManager instance; // 여기서 기본 생성자를 호출
     return instance;
 }
 
@@ -23,7 +23,7 @@ void GameManager::processEvents() {
 }
 
 void GameManager::update(float deltaTime) {
-    player.update(deltaTime);
+    player.update(deltaTime, map.getBounds()); // map.getBounds()로 경계를 전달
     for (auto& item : items) {
         if (item.isCollected(player.getBounds())) { // 경계 체크
             item.applyEffect(player);
@@ -32,7 +32,7 @@ void GameManager::update(float deltaTime) {
     for (auto& obstacle : obstacles) {
         obstacle.update(deltaTime);
         if (obstacle.collidesWith(player.getBounds())) { // 경계 체크
-            player.losePixel();
+            player.takeDamage();
         }
     }
     map.update(player.getBounds()); // 맵 충돌 체크
@@ -52,8 +52,11 @@ void GameManager::render() {
 }
 
 void GameManager::spawnItem() {
-    items.emplace_back(Item::createRandom());
+    float windowWidth = static_cast<float>(window.getSize().x);  // 창의 너비
+    float windowHeight = static_cast<float>(window.getSize().y); // 창의 높이
+    items.emplace_back(Item::createRandom(windowWidth, windowHeight)); // 인수 전달
 }
+
 
 void GameManager::spawnObstacle() {
     obstacles.emplace_back(Obstacle::createFallingObstacle(window.getSize().x));
